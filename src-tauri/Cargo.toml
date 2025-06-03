@@ -1,0 +1,38 @@
+[package]
+name = "reproduction-system"
+version = "0.1.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "reproduction_system_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# google-cloud dependencies
+google-oauth = "1.11.3"
+oauth2 = "5.0.0"
+
+## Tauri dependencies
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1.45.0", features = ["macros"] }
+chrono = "0.4.41"
+dotenvy = "0.15.7"
+base64 = "0.22.1"
+anyhow = "1.0.98"
+reqwest = "0.12.15"
+url = "2.5.4"
+tauri-plugin-shell = "2"
+regex = "1.11.1"
