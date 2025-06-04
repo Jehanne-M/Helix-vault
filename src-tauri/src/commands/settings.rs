@@ -39,15 +39,22 @@ impl Settings {
         Ok(())
     }
 
-    pub fn default_settings() -> anyhow::Result<Self> {
+    fn default_settings() -> anyhow::Result<Self> {
         // get user name from the system
         let output: Output = Command::new("whoami")
             .output()
             .expect("Failed to execute command");
-
         let mut user_name: String = String::new();
         let mut sync_default_paths: Vec<SyncPaths> = vec![];
-
+        let user_name2: String = if !output.stdout.is_empty() {
+            String::from_utf8(output.stdout.clone())
+                .unwrap()
+                .trim()
+                .to_string()
+        } else {
+            "Unknown".to_string()
+        };
+        println!("User name from whoami: {}", user_name2);
         if cfg!(target_os = "windows") {
             let info: String = String::from_utf8(output.stdout).unwrap();
             user_name = info.split("\\").collect::<Vec<&str>>()[1]
