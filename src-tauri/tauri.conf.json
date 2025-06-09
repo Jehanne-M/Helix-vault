@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "reproduction-system",
+  "productName": "helix_vault",
   "version": "0.1.0",
-  "identifier": "reproduction-system",
+  "identifier": "helix-vault",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "reproduction-system",
+        "title": "helix_vault",
         "width": 800,
         "height": 600,
         "resizable": false

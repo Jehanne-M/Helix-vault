@@ -8,7 +8,7 @@ type SyncPath = {
 };
 type Settings = {
   sync_pair: SyncPath[];
-  destination_address?: string;
+  destination_root_address?: string;
   process_time: string;
 };
 

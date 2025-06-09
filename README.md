@@ -4,7 +4,7 @@
 ## Get Test Start
 
 ``` shell
-pnpm
+pnpm install
 pnpm tauri dev
 ```
 

@@ -16,6 +16,7 @@ pub struct SyncPaths {
 pub struct Settings {
     pub sync_pair: Vec<SyncPaths>,
     pub user_name: String,
+    pub destination_root_address: String,
     pub process_time: String,
 }
 impl Settings {
@@ -44,39 +45,41 @@ impl Settings {
         let output: Output = Command::new("whoami")
             .output()
             .expect("Failed to execute command");
-        let mut user_name: String = String::new();
-        let mut sync_default_paths: Vec<SyncPaths> = vec![];
-        let user_name2: String = if !output.stdout.is_empty() {
-            String::from_utf8(output.stdout.clone())
-                .unwrap()
+        let user_name: String = if !output.stdout.is_empty() && cfg!(target_os = "windows") {
+            String::from_utf8(output.stdout.clone())?
+                .split("\\")
+                .collect::<Vec<&str>>()[1]
                 .trim()
                 .to_string()
+        } else if cfg!(target_os = "linux") || cfg!(target_os = "macos") {
+            String::from_utf8(output.stdout).unwrap().trim().to_string()
         } else {
             "Unknown".to_string()
         };
-        println!("User name from whoami: {}", user_name2);
+
+        // Set default sync paths based on the OS
+        let mut sync_default_paths: Vec<SyncPaths> = vec![];
         if cfg!(target_os = "windows") {
-            let info: String = String::from_utf8(output.stdout).unwrap();
-            user_name = info.split("\\").collect::<Vec<&str>>()[1]
-                .trim()
-                .to_string();
             sync_default_paths = vec![SyncPaths {
                 source: format!("C:\\Users\\{}\\OneDrive\\デスクトップ\\source", user_name),
                 destination: format!("C:\\Users\\{}\\OneDrive\\デスクトップ\\backup", user_name),
             }];
         } else if cfg!(target_os = "linux") || cfg!(target_os = "macos") {
-            user_name = String::from_utf8(output.stdout).unwrap().trim().to_string();
             sync_default_paths = vec![SyncPaths {
                 source: format!("/home/{}", user_name),
                 destination: format!("/mnt/home/{}", user_name),
             }];
         } else {
-            user_name = "Unknown".to_string();
+            return Err(anyhow::anyhow!("Unsupported OS"));
         }
-        println!("User name: {}", user_name);
         let default_settings = Settings {
             sync_pair: sync_default_paths,
             user_name: user_name.to_string(),
+            destination_root_address: if cfg!(target_os = "windows") {
+                format!("C:\\Users\\{}\\OneDrive\\ドキュメント", user_name)
+            } else {
+                format!("/home/{}", user_name)
+            },
             process_time: Local::now().format("%H:%M:%S").to_string(),
         };
         Ok(default_settings)
