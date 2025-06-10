@@ -1,34 +1,15 @@
 import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './App.css';
-
-type SyncPath = {
-  source: string;
-  destination: string;
-};
-type Settings = {
-  sync_pair: SyncPath[];
-  destination_root_address?: string;
-  process_time: string;
-};
+import Settings from './settings/page';
+import { useStore } from './store/setting';
 
 function App() {
   const [name, setName] = useState('Tauri');
-  const onLoad = async (): Promise<Settings | undefined> => {
-    await invoke<Settings>('load_config')
-      .then((config) => {
-        console.log('Config loaded from Rust:', config);
-        return config as Settings;
-      })
-      .catch((error: any) => {
-        console.error('Error loading config from Rust:', error);
-        return undefined;
-      });
 
-    return undefined;
-  };
+  const { settings, error, fetchSettings } = useStore();
   const onBackup = async () => {
-    await invoke<Settings>('backup')
+    await invoke('backup')
       .then((response: any) => {
         console.log('Backup response from Rust:', response);
       })
@@ -38,30 +19,22 @@ function App() {
   };
 
   useEffect(() => {
-    onLoad();
+    fetchSettings();
+    // const interval = setInterval(() => {
+    //   onBackup();
+    // }, 1000 * 60 * 60); // 1 hour
+    // return () => clearInterval(interval);
   }, []);
+  useEffect(() => {
+    console.log('Settings fetched successfully:', settings);
+    if (error) {
+      console.error('Error fetching settings:', error);
+    }
+  });
   return (
     <div>
-      <input
-        type='text'
-        value-={name}
-        onChange={(e) => setName(e.currentTarget.value)}
-      />
-      <button
-        onClick={() => {
-          invoke('greet', { name })
-            .then((response) => {
-              console.log('Response from Rust:', response);
-            })
-            .catch((error: any) => {
-              console.error('Error calling Rust function:', error);
-            });
-        }}
-      >
-        test
-      </button>
-
-      <button onClick={onBackup}>backup start</button>
+      {/* <button onClick={onBackup}>backup start</button> */}
+      <Settings />
     </div>
   );
 }
