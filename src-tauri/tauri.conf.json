@@ -37,7 +37,8 @@
         "language": ["ja-JP"]
       },
       "webviewInstallMode": {
-        "type": "embedBootstrapper"
+        "type": "fixedRuntime",
+        "path": "./Microsoft.WebView2.FixedVersionRuntime.137.0.3296.83.x64"
       }
     }
   }
