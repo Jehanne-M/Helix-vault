@@ -33,4 +33,3 @@ pnpm tauri dev
 ## front package
 
 - zustand
-keyboard test
