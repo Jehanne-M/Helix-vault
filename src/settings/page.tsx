@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, X } from 'lucide-react';
-
 import { SyncPath, useStore as settingsStore } from '../store/setting';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
@@ -8,10 +7,6 @@ import { invoke } from '@tauri-apps/api/core';
 const Settings: React.FC = () => {
   const [timeBackupEnabled, setTimeBackupEnabled] = useState<boolean>(true);
   const [backupRootTemp, setBackupRootTemp] = useState<string>('');
-  const [checkedState, setCheckedState] = useState<boolean>(true);
-  const [editPair, setEditPair] = useState<{
-    [key: string]: { source: boolean; destination: boolean };
-  }>({});
   const {
     addPair,
     openRootDialog,

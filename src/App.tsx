@@ -1,22 +1,20 @@
-import { useEffect, useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useEffect } from 'react';
 import './App.css';
 import Settings from './settings/page';
 import { useStore } from './store/setting';
 
 function App() {
-  const [name, setName] = useState('Tauri');
+  const { error, fetchSettings } = useStore();
 
-  const { settings, error, fetchSettings } = useStore();
-  const onBackup = async () => {
-    await invoke('backup')
-      .then((response: any) => {
-        console.log('Backup response from Rust:', response);
-      })
-      .catch((error: any) => {
-        console.error('Error during backup:', error);
-      });
-  };
+  // const onBackup = async () => {
+  //   await invoke('backup')
+  //     .then((response: any) => {
+  //       console.log('Backup response from Rust:', response);
+  //     })
+  //     .catch((error: any) => {
+  //       console.error('Error during backup:', error);
+  //     });
+  // };
 
   useEffect(() => {
     fetchSettings();
