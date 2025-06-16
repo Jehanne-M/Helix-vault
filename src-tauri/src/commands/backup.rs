@@ -3,13 +3,13 @@ use std::fs;
 use std::vec;
 pub struct Backup {
     sync_pair: Vec<SyncPaths>,
-    destination_root_address: Option<String>,
+    destination_root_address: String,
     operation_at: String,
 }
 impl Backup {
     pub fn new(
         sync_pair: Vec<SyncPaths>,
-        destination_root_address: Option<String>,
+        destination_root_address: String,
         operation_at: String,
     ) -> Self {
         Self {

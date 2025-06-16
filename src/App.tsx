@@ -26,7 +26,6 @@ function App() {
     // return () => clearInterval(interval);
   }, []);
   useEffect(() => {
-    console.log('Settings fetched successfully:', settings);
     if (error) {
       console.error('Error fetching settings:', error);
     }

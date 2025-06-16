@@ -13,6 +13,7 @@ pub async fn run() {
     dotenv().expect("Failed to load .env file");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             // This is where you can perform any setup tasks before the app starts

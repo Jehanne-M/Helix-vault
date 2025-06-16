@@ -46,7 +46,11 @@ pub fn backup() -> Result<(), String> {
 
     let settings = Settings::load(&config_path).unwrap();
     println!("Starting backup with settings: {:?}", settings);
-    let backup = backup::Backup::new(settings.sync_pair, None, settings.process_time);
+    let backup = backup::Backup::new(
+        settings.sync_pair,
+        settings.destination_root_address,
+        settings.process_time,
+    );
     backup
         .local_net_backup()
         .map_err(|e| format!("Backup failed: {}", e))

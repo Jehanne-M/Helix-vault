@@ -29,3 +29,7 @@ pnpm tauri dev
 ## use crate
 
 - tauri v2
+
+## front package
+
+- zustand
