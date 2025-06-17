@@ -9,6 +9,7 @@ const Settings: React.FC = () => {
   const [backupRootTemp, setBackupRootTemp] = useState<string>('');
   const {
     addPair,
+    error,
     openRootDialog,
     settings,
     initialSettings,
@@ -148,6 +149,12 @@ const Settings: React.FC = () => {
       console.log('settings===initialSettings:');
     }
   }, [settings, initialSettings]);
+
+  useEffect(() => {
+    if (error !== undefined) {
+      alert(`Error: ${error}`);
+    }
+  }, [error]);
 
   return (
     <div className=' bg-white overflow-hidden'>
