@@ -25,7 +25,7 @@ function App() {
   }, []);
   useEffect(() => {
     if (error) {
-      console.error('Error fetching settings:', error);
+      alert(`Error fetching settings:${error}`);
     }
   });
   return (

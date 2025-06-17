@@ -65,12 +65,12 @@ const Settings: React.FC = () => {
         if (result) {
           removePair(index);
         } else {
-          console.log('削除がキャンセルされました');
+          alert('削除がキャンセルされました');
           return false;
         }
       })
       .catch((error) => {
-        console.error('確認ダイアログのエラー:', error);
+        alert(`確認ダイアログのエラー:${error}`);
         return false;
       });
   };
@@ -90,10 +90,8 @@ const Settings: React.FC = () => {
       defaultPath
     });
     if (typeof directory === 'string') {
-      console.log('選択されたディレクトリ:', directory);
       return directory;
     } else {
-      console.error('ディレクトリの選択に失敗');
       return '';
     }
   };
@@ -112,7 +110,7 @@ const Settings: React.FC = () => {
   };
   const handleSave = () => {
     if (!settings) {
-      console.error('設定がロードされていません');
+      alert('設定がロードされていません');
       return;
     }
     updateSettings(settings);
@@ -126,10 +124,10 @@ const Settings: React.FC = () => {
   const handleManualBackup = async () => {
     await invoke('backup')
       .then((result) => {
-        console.log('バックアップ結果:', result);
+        alert(`バックアップ結果:${result}`);
       })
       .catch((error) => {
-        console.error('バックアップエラー:', error);
+        alert(`バックアップエラー:${error}`);
       });
   };
 
