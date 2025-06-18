@@ -34,37 +34,6 @@ pub async fn run() {
                 .show_menu_on_left_click(true)
                 .tooltip("Reproduction")
                 .build(app)?;
-            // let main_window = app
-            //     .get_webview_window("main")
-            //     .expect("Main window not found");
-            // let handle = app.handle();
-
-            // // 認証完了時の処理
-            // app.listen_global("auth-code-received", move |event| {
-            //     if let Some(code) = event.payload() {
-            //         println!("認証コードを受け取りました: {}", code);
-            //         let code_str = code.trim_matches('"').to_string(); // JSON文字列として渡されるためクォートを削除
-            //         tauri::async_runtime::spawn(async move {
-            //             let result = exchange_code_for_token(handle.state(), code_str).await;
-            //             match result {
-            //                 Ok(_) => {
-            //                     println!("アクセストークンとリフレッシュトークンを取得しました。");
-            //                     main_window
-            //                         .eval("window.location.hash = '';")
-            //                         .expect("Failed to eval"); // ハッシュをクリア
-            //                     main_window
-            //                         .emit("auth-success", ())
-            //                         .expect("Failed to emit"); // フロントエンドに成功を通知
-            //                 }
-            //                 Err(e) => {
-            //                     eprintln!("トークン交換エラー: {}", e);
-            //                     main_window.emit("auth-error", e).expect("Failed to emit");
-            //                     // フロントエンドにエラーを通知
-            //                 }
-            //             }
-            //         });
-            //     }
-            // });
 
             Ok(())
         })

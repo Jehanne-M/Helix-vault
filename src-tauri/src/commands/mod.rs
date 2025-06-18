@@ -20,30 +20,39 @@ pub fn greet(name: &str) -> String {
 
 #[tauri::command]
 pub fn load_config() -> Result<Settings, String> {
-    let config_dir =
-        env::current_dir().map_err(|e| format!("Failed to get config directory: {}", e))?;
-    let config_path = config_dir.join("config.json");
+    let mut temp_dir = std::env::temp_dir();
+    let app_name = env!("CARGO_PKG_NAME");
+    temp_dir = temp_dir.join(std::path::PathBuf::from(app_name));
+    if !temp_dir.exists() {
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp directory");
+    }
+    let config_path = temp_dir.join("config.json");
 
     Settings::load(&config_path).map_err(|e| format!("Failed to load settings: {}", e))
 }
 
 #[tauri::command]
 pub fn save_config(settings: Settings) -> Result<(), String> {
-    let config_dir =
-        env::current_dir().map_err(|e| format!("Failed to get config directory: {}", e))?;
-    let config_path = config_dir.join("config.json");
-
-    println!("Config path: {:?}", config_path);
+    let mut temp_dir = std::env::temp_dir();
+    let app_name = env!("CARGO_PKG_NAME");
+    temp_dir = temp_dir.join(std::path::PathBuf::from(app_name));
+    if !temp_dir.exists() {
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp directory");
+    }
+    let config_path = temp_dir.join("config.json");
     settings
         .save(&config_path)
         .map_err(|e| format!("Failed to save settings: {}", e))
 }
 #[tauri::command]
 pub fn backup() -> Result<(), String> {
-    let config_dir =
-        env::current_dir().map_err(|e| format!("Failed to get config directory: {}", e))?;
-    let config_path = config_dir.join("config.json");
-
+    let mut temp_dir = std::env::temp_dir();
+    let app_name = env!("CARGO_PKG_NAME");
+    temp_dir = temp_dir.join(std::path::PathBuf::from(app_name));
+    if !temp_dir.exists() {
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create temp directory");
+    }
+    let config_path = temp_dir.join("config.json");
     let settings = Settings::load(&config_path).unwrap();
     println!("Starting backup with settings: {:?}", settings);
     let backup = backup::Backup::new(

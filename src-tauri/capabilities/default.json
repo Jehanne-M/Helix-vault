@@ -8,13 +8,8 @@
     "opener:default",
     "shell:default",
     "dialog:default",
-    {
-      "identifier": "fs:allow-read-file",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    }
+    "core:path:allow-resolve",
+    "core:path:allow-resolve-directory",
+    "core:path:default"
   ]
 }
