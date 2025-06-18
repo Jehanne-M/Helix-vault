@@ -3,7 +3,6 @@ import { Edit, X } from 'lucide-react';
 import { SyncPath, useStore as settingsStore } from '../store/setting';
 import { useStore as backupStore } from '../store/backup';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
-import { invoke } from '@tauri-apps/api/core';
 
 const Settings: React.FC = () => {
   const [timeBackupEnabled, setTimeBackupEnabled] = useState<boolean>(true);
