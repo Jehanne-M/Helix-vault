@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Edit, X } from 'lucide-react';
 import { SyncPath, useStore as settingsStore } from '../store/setting';
+import { useStore as backupStore } from '../store/backup';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
 import { invoke } from '@tauri-apps/api/core';
 
@@ -22,7 +23,11 @@ const Settings: React.FC = () => {
     updateDestinationRoot,
     setOpenRootDialog
   } = settingsStore();
-
+  const {
+    error: backupError,
+    loading: backupLoading,
+    postBackup
+  } = backupStore();
   // NOTE: バックアップルートの編集処理
   const handleRootSave = () => {
     console.log('バックアップルートを保存:', backupRootTemp);
@@ -122,16 +127,6 @@ const Settings: React.FC = () => {
     alert('設定をキャンセルしました');
   };
 
-  const handleManualBackup = async () => {
-    await invoke('backup')
-      .then((result) => {
-        alert(`バックアップ結果:${result}`);
-      })
-      .catch((error) => {
-        alert(`バックアップエラー:${error}`);
-      });
-  };
-
   const DialogButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
     <button
       onClick={onClick}
@@ -150,12 +145,19 @@ const Settings: React.FC = () => {
     }
   }, [settings, initialSettings]);
 
+  // NOTE: settins関連エラー監視
   useEffect(() => {
     if (error !== undefined) {
       alert(`Error: ${error}`);
     }
   }, [error]);
 
+  // NOTE: バックアップの手動開始のエラー監視
+  useEffect(() => {
+    if (backupError !== undefined) {
+      alert(`バックアップエラー: ${backupError}`);
+    }
+  }, [backupError]);
   return (
     <div className=' bg-white overflow-hidden'>
       {/* Left Menu */}
@@ -291,7 +293,8 @@ const Settings: React.FC = () => {
         <div className='absolute bottom-8 right-8 flex gap-4'>
           {settings === initialSettings ? (
             <button
-              onClick={handleManualBackup}
+              onClick={postBackup}
+              disabled={backupLoading}
               className='w-36 h-7 bg-green-200 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-green-300'
             >
               <span className='text-black text-xs'>バックアップ手動開始</span>
