@@ -37,7 +37,7 @@ impl Backup {
 
             let destination = std::path::PathBuf::from(&pair.destination);
             let destination_depth_len = destination.components().count().saturating_sub(1); // -1 to exclude the root component
-
+                                                                                            // if !destination.exists() {}
             let mut source_list: Vec<String> = vec![];
 
             // 対象ディレクトリのファイルを再帰的に取得
@@ -45,6 +45,7 @@ impl Backup {
 
             for source_file in &source_list {
                 let source_path = std::path::PathBuf::from(source_file);
+                println!("destination: {}", destination.display());
                 let destination_path = destination.join(
                     source_path
                         .components()

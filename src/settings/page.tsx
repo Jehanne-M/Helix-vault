@@ -7,6 +7,9 @@ import { confirm, open } from '@tauri-apps/plugin-dialog';
 const Settings: React.FC = () => {
   const [timeBackupEnabled, setTimeBackupEnabled] = useState<boolean>(true);
   const [backupRootTemp, setBackupRootTemp] = useState<string>('');
+  const [destinationTemp, setDestinationTemp] = useState<string>('');
+  const [openDestinationDialog, setOpenDestinationDialog] =
+    useState<boolean>(false);
   const {
     addPair,
     error,
@@ -27,6 +30,7 @@ const Settings: React.FC = () => {
     loading: backupLoading,
     postBackup
   } = backupStore();
+
   // NOTE: バックアップルートの編集処理
   const handleRootSave = () => {
     console.log('バックアップルートを保存:', backupRootTemp);
@@ -45,7 +49,7 @@ const Settings: React.FC = () => {
     setBackupRootTemp(settings?.destination_root_address || '');
   };
 
-  // NOTE:
+  // NOTE: バックアップペアの追加・削除処理
   const handleAddBackupPair = () => {
     const newPair: SyncPath = {
       source: '',
@@ -101,18 +105,30 @@ const Settings: React.FC = () => {
     }
   };
 
+  // NOTE: バックアップ元・先の選択処理
   const onSelectSource = async (index: number) => {
     const selectDirectory = await selectDirectoryDialog(index, 'source');
     if (selectDirectory !== '') {
       updatePairSource(index, selectDirectory);
     }
   };
-  const onSelectDestination = async (index: number) => {
-    const selectDirectory = await selectDirectoryDialog(index, 'destination');
-    if (selectDirectory !== '') {
-      updatePairDestination(index, selectDirectory);
-    }
+  const handleDestinationSave = (index: number) => {
+    console.log('バックアップ先を保存:', destinationTemp);
+    updatePairDestination(index, destinationTemp);
+    setOpenDestinationDialog(false);
+    alert('バックアップ先を保存しました');
   };
+  const handleDestinationCancel = () => {
+    console.log('バックアップ先の編集をキャンセル');
+    setOpenDestinationDialog(false);
+    setDestinationTemp('');
+  };
+  const handleDestinationEdit = (index: number) => {
+    console.log('バックアップ先の編集を開始:', index);
+    setOpenDestinationDialog(true);
+    setDestinationTemp(settings?.sync_pair[index].destination || '');
+  };
+
   const handleSave = () => {
     if (!settings) {
       alert('設定がロードされていません');
@@ -256,15 +272,61 @@ const Settings: React.FC = () => {
               {/* Destination */}
               <div className='flex items-center'>
                 <div className='w-56 h-7 bg-zinc-100 rounded-sm flex items-center px-2'>
-                  <input
+                  {openDestinationDialog &&
+                  index === settings?.sync_pair.length - 1 ? (
+                    <>
+                      <input
+                        type='text'
+                        value={destinationTemp}
+                        onChange={(e) => setDestinationTemp(e.target.value)}
+                        className='w-full bg-transparent text-black text-xs outline-none'
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => handleDestinationSave(index)}
+                        className='w-10 h-7 ml-2 bg-sky-200 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-sky-300'
+                      >
+                        <span className='text-black text-xs'>保存</span>
+                      </button>
+                      <button
+                        onClick={handleDestinationCancel}
+                        className='w-16 h-7 ml-2 bg-zinc-300 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-zinc-400'
+                      >
+                        <span className='text-black text-xs'>キャンセル</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className='w-48 h-6 bg-zinc-100 text-black text-xs px-3 border-none outline-none flex items-center'>
+                        {pair.destination || ''}
+                      </div>
+                      <button
+                        onClick={() => {
+                          console.log('バックアップ先の編集を開始:', index);
+                          console.log(
+                            'length:',
+                            settings?.sync_pair.length - 1
+                          );
+                          handleDestinationEdit(index - 1);
+                        }}
+                        className='w-6 h-6 bg-white rounded-md shadow-md border
+                        border-black backdrop-blur-sm flex items-center
+                        justify-center hover:bg-gray-50'
+                        title='バックアップ先を編集'
+                      >
+                        <Edit className='w-6 h-6 text-gray-600' />
+                      </button>
+                    </>
+                  )}
+                  {/* <input
                     type='text'
                     readOnly={true}
                     value={pair.destination}
                     className='w-full bg-transparent text-black text-xs outline-none'
                     placeholder='バックアップ先を選択'
-                  />
+                  /> */}
                 </div>
-                <DialogButton onClick={() => onSelectDestination(index)} />
+                {/* <DialogButton onClick={() => onSelectDestination(index)} /> */}
                 {/* Delete Button */}
                 <button
                   onClick={() => handleDeleteBackupPair(index)}

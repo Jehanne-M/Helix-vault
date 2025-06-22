@@ -12,7 +12,7 @@ type Actions = {
 };
 
 export const useStore = create<State & Actions>((set) => ({
-  response: undefined,
+  response: null,
   error: undefined,
   loading: false,
   postBackup: async () => {
