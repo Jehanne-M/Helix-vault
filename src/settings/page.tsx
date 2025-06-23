@@ -124,7 +124,17 @@ const Settings: React.FC = () => {
   const onSelectSource = async (index: number) => {
     const selectDirectory = await selectDirectoryDialog(index, 'source');
     if (selectDirectory !== '') {
+      const tempPair = selectDirectory.replace(/\\/g, '/');
+      console.log(`selectDirectory: ${selectDirectory}`);
+      console.log(`path remakeed ${tempPair}`);
+      const pathParts = tempPair.split('/').filter((part) => part !== '');
+      const targetParts = pathParts.slice(2);
+      console.log(`tempPart: ${targetParts}`);
+      const destinationPath = `\\\\${
+        settings?.destination_root_address
+      }\\${targetParts.join('\\')}`;
       updatePairSource(index, selectDirectory);
+      updatePairDestination(index, destinationPath);
     }
   };
 
