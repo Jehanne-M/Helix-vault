@@ -7,9 +7,12 @@ import { confirm, open } from '@tauri-apps/plugin-dialog';
 const Settings: React.FC = () => {
   const [timeBackupEnabled, setTimeBackupEnabled] = useState<boolean>(true);
   const [backupRootTemp, setBackupRootTemp] = useState<string>('');
-  const [destinationTemp, setDestinationTemp] = useState<string>('');
-  const [openDestinationDialog, setOpenDestinationDialog] =
-    useState<boolean>(false);
+  const [backupPairEditStates, setBackupPairEditStates] = useState<boolean[]>(
+    []
+  );
+  const [backupPairCancelValues, setBackupPairCancelValues] = useState<
+    string[]
+  >([]);
   const {
     addPair,
     error,
@@ -56,6 +59,8 @@ const Settings: React.FC = () => {
       destination: ''
     };
     addPair(newPair);
+    setBackupPairEditStates((prev) => [...prev, false]);
+    setBackupPairCancelValues((prev) => [...prev, '']);
   };
   const handleDeleteBackupPair = async (index: number) => {
     console.log('バックアップペアを削除:', index);
@@ -73,6 +78,16 @@ const Settings: React.FC = () => {
       .then((result) => {
         if (result) {
           removePair(index);
+          setBackupPairEditStates((prev) => {
+            const newStates = [...prev];
+            newStates.splice(index, 1);
+            return newStates;
+          });
+          setBackupPairCancelValues((prev) => {
+            const newStates = [...prev];
+            newStates.splice(index, 1);
+            return newStates;
+          });
         } else {
           alert('削除がキャンセルされました');
           return false;
@@ -111,22 +126,6 @@ const Settings: React.FC = () => {
     if (selectDirectory !== '') {
       updatePairSource(index, selectDirectory);
     }
-  };
-  const handleDestinationSave = (index: number) => {
-    console.log('バックアップ先を保存:', destinationTemp);
-    updatePairDestination(index, destinationTemp);
-    setOpenDestinationDialog(false);
-    alert('バックアップ先を保存しました');
-  };
-  const handleDestinationCancel = () => {
-    console.log('バックアップ先の編集をキャンセル');
-    setOpenDestinationDialog(false);
-    setDestinationTemp('');
-  };
-  const handleDestinationEdit = (index: number) => {
-    console.log('バックアップ先の編集を開始:', index);
-    setOpenDestinationDialog(true);
-    setDestinationTemp(settings?.sync_pair[index].destination || '');
   };
 
   const handleSave = () => {
@@ -271,61 +270,71 @@ const Settings: React.FC = () => {
 
               {/* Destination */}
               <div className='flex items-center'>
-                <div className='w-56 h-7 bg-zinc-100 rounded-sm flex items-center px-2'>
-                  {openDestinationDialog &&
-                  index === settings?.sync_pair.length - 1 ? (
-                    <>
-                      <input
-                        type='text'
-                        value={destinationTemp}
-                        onChange={(e) => setDestinationTemp(e.target.value)}
-                        className='w-full bg-transparent text-black text-xs outline-none'
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => handleDestinationSave(index)}
-                        className='w-10 h-7 ml-2 bg-sky-200 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-sky-300'
-                      >
-                        <span className='text-black text-xs'>保存</span>
-                      </button>
-                      <button
-                        onClick={handleDestinationCancel}
-                        className='w-16 h-7 ml-2 bg-zinc-300 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-zinc-400'
-                      >
-                        <span className='text-black text-xs'>キャンセル</span>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className='w-48 h-6 bg-zinc-100 text-black text-xs px-3 border-none outline-none flex items-center'>
-                        {pair.destination || ''}
-                      </div>
-                      <button
-                        onClick={() => {
-                          console.log('バックアップ先の編集を開始:', index);
-                          console.log(
-                            'length:',
-                            settings?.sync_pair.length - 1
-                          );
-                          handleDestinationEdit(index - 1);
-                        }}
-                        className='w-6 h-6 bg-white rounded-md shadow-md border
-                        border-black backdrop-blur-sm flex items-center
-                        justify-center hover:bg-gray-50'
-                        title='バックアップ先を編集'
-                      >
-                        <Edit className='w-6 h-6 text-gray-600' />
-                      </button>
-                    </>
-                  )}
-                  {/* <input
-                    type='text'
-                    readOnly={true}
-                    value={pair.destination}
-                    className='w-full bg-transparent text-black text-xs outline-none'
-                    placeholder='バックアップ先を選択'
-                  /> */}
-                </div>
+                {backupPairEditStates[index] ? (
+                  <>
+                    <input
+                      type='text'
+                      value={pair.destination}
+                      onChange={(e) =>
+                        updatePairDestination(index, e.target.value)
+                      }
+                      className='w-48 h-6 bg-zinc-100 text-black text-xs px-3 border-none outline-none'
+                    />
+                    <button
+                      onClick={() => {
+                        setBackupPairEditStates((prev) => {
+                          const newStates = [...prev];
+                          newStates[index] = false;
+                          return newStates;
+                        });
+                      }}
+                      className='w-10 h-7 ml-2 bg-sky-200 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-sky-300'
+                    >
+                      <span className='text-black text-xs'>保存</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setBackupPairEditStates((prev) => {
+                          const newStates = [...prev];
+                          newStates[index] = false;
+                          return newStates;
+                        });
+                        updatePairDestination(
+                          index,
+                          backupPairCancelValues[index]
+                        );
+                      }}
+                      className='w-16 h-7 ml-2 bg-zinc-300 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-zinc-400'
+                    >
+                      <span className='text-black text-xs'>キャンセル</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className='w-48 h-6 bg-zinc-100 text-black text-xs px-3 border-none outline-none flex items-center'>
+                      {pair.destination || ''}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setBackupPairEditStates((prev) => {
+                          const newStates = [...prev];
+                          newStates[index] = true;
+                          return newStates;
+                        });
+                        setBackupPairCancelValues((prev) => {
+                          const newStates = [...prev];
+                          newStates[index] =
+                            settings?.sync_pair[index].destination;
+                          return newStates;
+                        });
+                      }}
+                      className='w-6 h-6 bg-white rounded-md shadow-md border border-black backdrop-blur-sm flex items-center justify-center hover:bg-gray-50'
+                      title='バックアップ先を編集'
+                    >
+                      <Edit className='w-6 h-6 text-gray-600' />
+                    </button>
+                  </>
+                )}
                 {/* <DialogButton onClick={() => onSelectDestination(index)} /> */}
                 {/* Delete Button */}
                 <button
