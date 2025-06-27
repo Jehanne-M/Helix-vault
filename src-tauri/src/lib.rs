@@ -6,12 +6,29 @@ use tauri::{
     tray::TrayIconBuilder,
     // Manager, WindowBuilder, WindowUrl,
 };
+use tauri_plugin_log::TargetKind;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub async fn run() {
     tauri::Builder::default()
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .target(tauri_plugin_log::Target::new(TargetKind::LogDir {
+                    file_name: Some("logs".to_string()),
+                }))
+                .format(|out, message, record| {
+                    out.finish(format_args!(
+                        "[{}] {}: {}",
+                        record.level(),
+                        message,
+                        record.args()
+                    ));
+                })
+                .build(),
+        )
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             // This is where you can perform any setup tasks before the app starts
             // For example, you can initialize a database connection or set up logging
@@ -41,7 +58,6 @@ pub async fn run() {
             // This is where you can perform tasks when the page loads
             // For example, you can send a message to the frontend or update the UI
         })
-        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             greet,
             load_config,

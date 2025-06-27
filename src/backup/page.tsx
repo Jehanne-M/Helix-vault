@@ -37,6 +37,32 @@ const Settings: React.FC = () => {
     postBackup
   } = backupStore();
 
+  useEffect(() => {
+    let intervalId: number | null = null;
+
+    if (timeBackupEnabled && settings?.process_time) {
+      intervalId = setInterval(() => {
+        const now = new Date();
+        const [hours, minutes, seconds] = settings.process_time
+          .split(':')
+          .map(Number);
+        if (
+          now.getHours() === hours &&
+          now.getMinutes() === minutes &&
+          now.getSeconds() === seconds
+        ) {
+          postBackup();
+        }
+      }, 1000); // 1秒ごとにチェック
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId); // コンポーネントがアンマウントされたとき、またはtimeBackupEnabledがfalseになったときにインターバルをクリア
+      }
+    };
+  }, [timeBackupEnabled, settings?.process_time, postBackup]);
+
   // NOTE: バックアップルートの編集処理
   const handleRootSave = () => {
     console.log('バックアップルートを保存:', backupRootTemp);
@@ -157,9 +183,9 @@ const Settings: React.FC = () => {
         );
         if (destinationType === 'windows-drive-letter') {
           // Windowsドライブレターの場合(例: C:\)、先頭に何もつけずに結合
-          const destinationPath = `${
-            settings?.destination_root_address
-          }${targetParts.join('\\')}`;
+          const destinationPath = `${settings?.destination_root_address}${
+            settings?.user_name ?? 'unknown'
+          }\\${targetParts.join('\\')}`;
           updatePairDestination(index, destinationPath);
           console.log('Destination Path for DriveLetter:', destinationPath);
         } else if (
@@ -215,6 +241,7 @@ const Settings: React.FC = () => {
     }
   }, [backupError]);
 
+  // NOTE: 定期バックアップ有効なら設定時間になったら、バックアップ自動開始
   return (
     <div className=' bg-white overflow-hidden'>
       {/* Left Menu */}

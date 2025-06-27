@@ -9,6 +9,7 @@ export type Settings = {
   sync_pair: SyncPath[];
   destination_root_address: string;
   process_time: string;
+  user_name: string;
 };
 
 type State = {
@@ -50,7 +51,8 @@ export const useStore = create<State & Action>((set) => ({
               sync_pair: [newPair],
               destination_root_address:
                 state.initialSettings?.destination_root_address || '',
-              process_time: state.initialSettings?.process_time || '00:00:00'
+              process_time: state.initialSettings?.process_time || '00:00:00',
+              user_name: state.initialSettings?.user_name || ''
             }
       }));
     } catch (error) {
@@ -138,6 +140,7 @@ export const useStore = create<State & Action>((set) => ({
           : {
               sync_pair: state.initialSettings?.sync_pair || [],
               destination_root_address: newRoot,
+              user_name: state.initialSettings?.user_name || '',
               process_time: state.initialSettings?.process_time || '00:00:00'
             }
       }));
@@ -158,6 +161,7 @@ export const useStore = create<State & Action>((set) => ({
               sync_pair: state.initialSettings?.sync_pair || [],
               destination_root_address:
                 state.initialSettings?.destination_root_address || '',
+              user_name: state.initialSettings?.user_name || '',
               process_time: newTime
             }
       }));

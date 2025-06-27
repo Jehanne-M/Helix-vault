@@ -1,3 +1,6 @@
+use log::error;
+use log::info;
+
 use crate::commands::settings::SyncPaths;
 use std::fs;
 use std::vec;
@@ -21,9 +24,17 @@ impl Backup {
     fn enum_files(path: &std::path::PathBuf, source_list: &mut Vec<String>) {
         if path.is_dir() {
             // ディレクトリの場合は再帰的に探索
-            for entry in std::fs::read_dir(path).expect("Failed to read directory") {
-                let entry = entry.expect("Failed to read entry");
-                Self::enum_files(&entry.path(), source_list);
+            println!("enum_files start path: {}", path.display());
+            match std::fs::read_dir(path) {
+                Ok(entries) => {
+                    for entry in entries {
+                        let entry = entry.expect("Failed to read entry");
+                        Self::enum_files(&entry.path(), source_list);
+                    }
+                }
+                Err(e) => {
+                    error!("Failed to read directory {}: {}", path.display(), e);
+                }
             }
         } else {
             // ファイルの場合はファイル名を表示
@@ -77,18 +88,26 @@ impl Backup {
                     }
                 }
                 if destination_path.exists() {
-                    let source_metadata = fs::metadata(source_file)?;
-                    let destination_metadata = fs::metadata(&destination_path).ok();
-                    println!("{} metadata: {:?}", source_file, source_metadata);
-                    println!(
-                        "{:?} metadata: {:?}",
-                        &destination_path, destination_metadata
-                    );
+                    let source_metadata = fs::metadata(source_file)?.created()?;
+                    let destination_metadata = fs::metadata(&destination_path)?.created()?;
+                    if source_metadata == destination_metadata {
+                        info!(
+                            "File {} already exists in the destination directory, skipping.",
+                            source_file
+                        );
+                        continue;
+                    } else {
+                        //  if the file exists but has different metadata, overwrite it
+                        match std::fs::copy(source_path, destination_path) {
+                            Ok(_) => info!("Backup successful"),
+                            Err(e) => error!("Failed to copy from {}: {}", source_file, e),
+                        }
+                    }
                 } else {
                     //  copy the source directory to the destination directory
                     match std::fs::copy(source_path, destination_path) {
-                        Ok(_) => println!("Backup successful"),
-                        Err(e) => println!("Failed to copy from {}", e),
+                        Ok(_) => info!("Backup successful"),
+                        Err(e) => error!("Failed to copy from {}", e),
                     }
                 };
             }
