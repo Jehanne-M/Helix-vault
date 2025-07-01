@@ -17,11 +17,14 @@ pub async fn run() {
                     file_name: Some("logs".to_string()),
                 }))
                 .format(|out, message, record| {
+                    let jst = chrono::Local::now().format("%Y-%m-%d %H:%M:%S");
                     out.finish(format_args!(
-                        "[{}] {}: {}",
+                        "[{} {}] {} [{}: {}]",
                         record.level(),
+                        jst,
                         message,
-                        record.args()
+                        record.file().unwrap_or("unknown"),
+                        record.line().unwrap_or(0)
                     ));
                 })
                 .build(),

@@ -1,7 +1,5 @@
-use log::error;
-use log::info;
-
 use crate::commands::settings::SyncPaths;
+use log::{error, info, warn};
 use std::fs;
 use std::vec;
 pub struct Backup {
@@ -37,26 +35,25 @@ impl Backup {
                 }
             }
         } else {
-            // ファイルの場合はファイル名を表示
+            // ファイルの場合はファイル名を配列に追加
             source_list.push(path.to_string_lossy().to_string());
         }
     }
     pub fn local_net_backup(&self) -> anyhow::Result<()> {
         for pair in &self.sync_pair {
             let source = std::path::PathBuf::from(&pair.source);
-            let source_depth_len = source.components().count().saturating_sub(1); // -1 to exclude the root component
 
             let destination = std::path::PathBuf::from(&pair.destination);
-            let destination_depth_len = destination.components().count().saturating_sub(1); // -1 to exclude the root component
-                                                                                            // if !destination.exists() {}
-            let mut source_list: Vec<String> = vec![];
 
-            // 対象ディレクトリのファイルを再帰的に取得
+            // 対象ディレクトリのファイルを再帰的に取得し、source_listに格納
+            let mut source_list: Vec<String> = vec![];
             Self::enum_files(&source, &mut source_list);
 
+            let source_depth_len = source.components().count().saturating_sub(1); // -1 to exclude the root component
+            let destination_depth_len = destination.components().count().saturating_sub(1); // -1 to exclude the root component
             for source_file in &source_list {
                 let source_path = std::path::PathBuf::from(source_file);
-                println!("destination: {}", destination.display());
+
                 let destination_path = destination.join(
                     source_path
                         .components()
@@ -80,7 +77,7 @@ impl Backup {
                             Self::create_dir(dir_str).map_err(|e| anyhow::anyhow!(e))?
                         }
                         None => {
-                            println!(
+                            error!(
                                 "Failed to convert destination directory to string: {}",
                                 destination_dir.display()
                             );
@@ -88,26 +85,27 @@ impl Backup {
                     }
                 }
                 if destination_path.exists() {
-                    let source_metadata = fs::metadata(source_file)?.created()?;
-                    let destination_metadata = fs::metadata(&destination_path)?.created()?;
-                    if source_metadata == destination_metadata {
-                        info!(
-                            "File {} already exists in the destination directory, skipping.",
-                            source_file
-                        );
-                        continue;
+                    let source_metadata = fs::metadata(source_file)?.modified()?;
+                    let destination_metadata = fs::metadata(&destination_path)?.modified()?;
+                    // println!(
+                    //     "source_metadata: {:?}, destination_metadata: {:?}",
+                    //     source_metadata, destination_metadata
+                    // );
+                    if source_metadata > destination_metadata {
+                        match std::fs::copy(source_path, destination_path) {
+                            Ok(_) => info!("Backup successful {source_file}"),
+                            Err(e) => error!("Failed to copy from: {e}"),
+                        }
                     } else {
                         //  if the file exists but has different metadata, overwrite it
-                        match std::fs::copy(source_path, destination_path) {
-                            Ok(_) => info!("Backup successful"),
-                            Err(e) => error!("Failed to copy from {}: {}", source_file, e),
-                        }
+                        info!("file copy skipping {source_file}. not changed since last backup.");
+                        continue;
                     }
                 } else {
                     //  copy the source directory to the destination directory
                     match std::fs::copy(source_path, destination_path) {
-                        Ok(_) => info!("Backup successful"),
-                        Err(e) => error!("Failed to copy from {}", e),
+                        Ok(_) => info!("Backup successful: {source_file}"),
+                        Err(e) => error!("Failed to copy: {e}"),
                     }
                 };
             }
@@ -117,7 +115,7 @@ impl Backup {
 
     fn create_dir(target_dir: &str) -> Result<(), String> {
         std::fs::create_dir_all(target_dir)
-            .map_err(|e| format!("Failed to create backup directory: {}", e))?;
+            .map_err(|e| format!("Failed to create backup directory: {:?}", e))?;
         Ok(())
     }
 }
