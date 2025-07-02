@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import './App.css';
-import Settings from './backup/page';
 import { useStore } from './store/setting';
+import Backup from './backup/page';
 
 function App() {
   const { error, fetchSettings } = useStore();
@@ -16,7 +16,7 @@ function App() {
   });
   return (
     <div>
-      <Settings />
+      <Backup />
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { confirm, open } from '@tauri-apps/plugin-dialog';
 import { stringType } from '../components/validator';
 import ToolTip from '../components/ToolTip';
 
-const Settings: React.FC = () => {
+const Backup: React.FC = () => {
   const [timeBackupEnabled, setTimeBackupEnabled] = useState<boolean>(true);
   const [backupRootTemp, setBackupRootTemp] = useState<string>('');
   const [backupPairEditStates, setBackupPairEditStates] = useState<boolean[]>(
@@ -480,4 +480,4 @@ const Settings: React.FC = () => {
   );
 };
 
-export default Settings;
+export default Backup;

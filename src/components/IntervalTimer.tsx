@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 type Callback = () => void;
 
