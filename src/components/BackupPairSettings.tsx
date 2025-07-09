@@ -3,10 +3,11 @@ import { Edit, X } from 'lucide-react';
 import { SyncPath } from '../store/setting';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
 import { stringType } from '../components/validator';
+import { create } from 'zustand';
 
 type BackupPairSettingsProps = {
   settings: any;
-  addPair: (pair: SyncPath) => void;
+  addPair?: (pair: SyncPath) => void | null;
   removePair: (index: number) => void;
   updatePairSource: (index: number, source: string) => void;
   updatePairDestination: (index: number, destination: string) => void;
@@ -31,13 +32,15 @@ const BackupPairSettings: React.FC<BackupPairSettingsProps> = ({
   >([]);
 
   const handleAddBackupPair = () => {
-    const newPair: SyncPath = {
-      source: '',
-      destination: ''
-    };
-    addPair(newPair);
-    setBackupPairEditStates((prev) => [...prev, false]);
-    setBackupPairCancelValues((prev) => [...prev, '']);
+    if (addPair !== undefined) {
+      const newPair: SyncPath = {
+        source: '',
+        destination: ''
+      };
+      addPair(newPair);
+      setBackupPairEditStates((prev) => [...prev, false]);
+      setBackupPairCancelValues((prev) => [...prev, '']);
+    }
   };
 
   const handleDeleteBackupPair = async (index: number) => {
@@ -103,37 +106,43 @@ const BackupPairSettings: React.FC<BackupPairSettingsProps> = ({
     if (selectDirectory !== '') {
       updatePairSource(index, selectDirectory);
 
-      const tempPair = selectDirectory.replace(/\\/g, '/');
-      const pathParts = tempPair.split('/').filter((part) => part !== '');
-      const targetParts = pathParts.slice(pathLevel);
-      if (settings?.destination_root_address !== undefined) {
-        const destinationType = stringType(settings.destination_root_address);
-        console.log(
-          'Destination Type:',
-          destinationType,
-          'Target Parts:',
-          targetParts
-        );
-        if (destinationType === 'windows-drive-letter') {
-          const destinationPath = `${settings?.destination_root_address}${
-            settings?.user_name ?? 'unknown'
-          }\\${targetParts.join('\\')}`;
-          updatePairDestination(index, destinationPath);
-          console.log('Destination Path for DriveLetter:', destinationPath);
-        } else if (
-          destinationType === 'domain-name' ||
-          destinationType === 'ipv4-address'
-        ) {
-          const destinationPath = `\\\\${
-            settings?.destination_root_address
-          }\\${targetParts.join('\\')}`;
-          console.log('Destination Path for Domain/IP:', destinationPath);
-          updatePairDestination(index, destinationPath);
-        }
+      const deleteBackSlash = selectDirectory.replace(/\\/g, '/');
+      const deleteColons = deleteBackSlash.replace(/:/g, '');
+      const pathParts = deleteColons.split('/').filter((part) => part !== '');
+      console.log('Selected Source Path Parts:', pathParts);
+      console.log('Path Level:', pathLevel);
+      console.log('path length:', pathParts.length);
+      if (pathParts.length <= pathLevel) {
+        const targetParts = pathParts;
+        createTempPath(index, targetParts);
+      } else {
+        const targetParts = pathParts.slice(pathLevel);
+        createTempPath(index, targetParts);
       }
     }
   };
+  const createTempPath = (index: number, pathParts: string[]) => {
+    if (settings?.destination_root_address !== undefined) {
+      const destinationType = stringType(settings.destination_root_address);
 
+      if (destinationType === 'windows-drive-letter') {
+        const destinationPath = `${settings?.destination_root_address}${
+          settings?.user_name ?? 'unknown'
+        }\\${pathParts.join('\\')}`;
+        updatePairDestination(index, destinationPath);
+        console.log('Destination Path for DriveLetter:', destinationPath);
+      } else if (
+        destinationType === 'domain-name' ||
+        destinationType === 'ipv4-address'
+      ) {
+        const destinationPath = `\\\\${
+          settings?.destination_root_address
+        }\\${pathParts.join('\\')}`;
+        console.log('Destination Path for Domain/IP:', destinationPath);
+        updatePairDestination(index, destinationPath);
+      }
+    }
+  };
   const DialogButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
     <button
       onClick={onClick}
@@ -250,14 +259,16 @@ const BackupPairSettings: React.FC<BackupPairSettingsProps> = ({
       </div>
 
       {/* Add Button */}
-      <div className='mt-8'>
-        <button
-          onClick={handleAddBackupPair}
-          className='w-10 h-7 bg-lime-200 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-lime-300'
-        >
-          <span className='text-black text-xs'>追加</span>
-        </button>
-      </div>
+      {addPair !== undefined && (
+        <div className='mt-8'>
+          <button
+            onClick={handleAddBackupPair}
+            className='w-10 h-7 bg-lime-200 rounded-md shadow-md border border-black backdrop-blur-sm hover:bg-lime-300'
+          >
+            <span className='text-black text-xs'>追加</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

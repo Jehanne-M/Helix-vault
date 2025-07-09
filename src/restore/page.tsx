@@ -5,7 +5,6 @@ import { useStore as settingsStore } from '../store/setting';
 const Restore: React.FC = () => {
   const { settings, removePair, updatePairDestination, updateDestinationRoot } =
     settingsStore();
-
   return (
     <div>
       <h1>リストア設定</h1>
@@ -15,7 +14,6 @@ const Restore: React.FC = () => {
           removePair={removePair}
           updatePairDestination={updatePairDestination}
           updateDestinationRoot={updateDestinationRoot}
-          addPair={() => {}}
           updatePairSource={() => {}}
           pathLevel={0}
         />

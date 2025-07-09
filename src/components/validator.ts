@@ -5,7 +5,8 @@
  */
 export const isValidWindowsDriveLetter = (value: string): boolean => {
   // Regular expression to match a valid Windows drive letter (e.g., C:, D:, E:)
-  const windowsDriveLetterRegex = /^[A-Z]:\\$/i;
+  const windowsDriveLetterRegex =
+    /^(?:[A-Z]:\\$|^[A-Z]:?$|^[A-Z]$|^\/[a-zA-Z]+(?:$|\/))/i;
 
   // Test the value against the regex
   return windowsDriveLetterRegex.test(value);

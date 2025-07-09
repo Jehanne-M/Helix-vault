@@ -30,32 +30,6 @@ const Backup: React.FC = () => {
     postBackup
   } = backupStore();
 
-  useEffect(() => {
-    let intervalId: number | null = null;
-
-    if (timeBackupEnabled && settings?.process_time) {
-      intervalId = setInterval(() => {
-        const now = new Date();
-        const [hours, minutes, seconds] = settings.process_time
-          .split(':')
-          .map(Number);
-        if (
-          now.getHours() === hours &&
-          now.getMinutes() === minutes &&
-          now.getSeconds() === seconds
-        ) {
-          postBackup();
-        }
-      }, 1000); // 1秒ごとにチェック
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId); // コンポーネントがアンマウントされたとき、またはtimeBackupEnabledがfalseになったときにインターバルをクリア
-      }
-    };
-  }, [timeBackupEnabled, settings?.process_time, postBackup]);
-
   // NOTE: バックアップルートの編集処理
   const handleRootSave = () => {
     console.log('バックアップルートを保存:', backupRootTemp);
@@ -100,6 +74,42 @@ const Backup: React.FC = () => {
     initialize(initialSettings);
     alert('設定をキャンセルしました');
   };
+
+  // NOTE: 設定時間になったらバックアップを実行する
+  useEffect(() => {
+    let intervalId: number | null = null;
+
+    if (timeBackupEnabled && settings?.process_time) {
+      intervalId = setInterval(() => {
+        const now = new Date();
+        const [hours, minutes, seconds] = settings.process_time
+          .split(':')
+          .map(Number);
+        if (
+          now.getHours() === hours &&
+          now.getMinutes() === minutes &&
+          now.getSeconds() === seconds
+        ) {
+          postBackup();
+        }
+      }, 1000); // 1秒ごとにチェック
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId); // コンポーネントがアンマウントされたとき、またはtimeBackupEnabledがfalseになったときにインターバルをクリア
+      }
+    };
+  }, [timeBackupEnabled, settings?.process_time, postBackup]);
+
+  useEffect(() => {
+    if (error) {
+      alert(`設定の取得に失敗しました: ${error}`);
+    }
+    if (backupError) {
+      alert(`バックアップの実行に失敗しました: ${backupError}`);
+    }
+  }, [error, backupError]);
 
   return (
     <div>

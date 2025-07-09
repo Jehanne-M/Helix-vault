@@ -5,6 +5,7 @@ import { useStore } from './store/setting';
 import Backup from './backup/page';
 import Restore from './restore/page';
 import LeftMenu from './components/LeftMenu';
+import { isValidWindowsDriveLetter } from './components/validator';
 
 function App() {
   const { error, fetchSettings } = useStore();
