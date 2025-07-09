@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { useStore } from './store/setting';
 import Backup from './backup/page';
 import Restore from './restore/page';
 import LeftMenu from './components/LeftMenu';
-import { isValidWindowsDriveLetter } from './components/validator';
 
 function App() {
   const { error, fetchSettings } = useStore();

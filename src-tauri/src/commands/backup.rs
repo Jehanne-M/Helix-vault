@@ -1,23 +1,13 @@
 use crate::commands::settings::SyncPaths;
-use log::{error, info, warn};
+use log::{error, info};
 use std::fs;
 use std::vec;
 pub struct Backup {
     sync_pair: Vec<SyncPaths>,
-    destination_root_address: String,
-    operation_at: String,
 }
 impl Backup {
-    pub fn new(
-        sync_pair: Vec<SyncPaths>,
-        destination_root_address: String,
-        operation_at: String,
-    ) -> Self {
-        Self {
-            sync_pair,
-            destination_root_address,
-            operation_at,
-        }
+    pub fn new(sync_pair: Vec<SyncPaths>) -> Self {
+        Self { sync_pair }
     }
     fn enum_files(path: &std::path::PathBuf, source_list: &mut Vec<String>) {
         if path.is_dir() {

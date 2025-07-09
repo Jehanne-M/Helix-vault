@@ -198,7 +198,6 @@ const Backup: React.FC = () => {
         removePair={removePair}
         updatePairSource={updatePairSource}
         updatePairDestination={updatePairDestination}
-        updateDestinationRoot={updateDestinationRoot}
         pathLevel={pathLevel}
       />
 

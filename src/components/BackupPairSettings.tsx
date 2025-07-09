@@ -3,7 +3,6 @@ import { Edit, X } from 'lucide-react';
 import { SyncPath } from '../store/setting';
 import { confirm, open } from '@tauri-apps/plugin-dialog';
 import { stringType } from '../components/validator';
-import { create } from 'zustand';
 
 type BackupPairSettingsProps = {
   settings: any;
@@ -11,7 +10,6 @@ type BackupPairSettingsProps = {
   removePair: (index: number) => void;
   updatePairSource: (index: number, source: string) => void;
   updatePairDestination: (index: number, destination: string) => void;
-  updateDestinationRoot: (root: string) => void;
   pathLevel: number;
 };
 
@@ -21,7 +19,6 @@ const BackupPairSettings: React.FC<BackupPairSettingsProps> = ({
   removePair,
   updatePairSource,
   updatePairDestination,
-  updateDestinationRoot,
   pathLevel
 }) => {
   const [backupPairEditStates, setBackupPairEditStates] = useState<boolean[]>(
